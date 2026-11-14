@@ -3,814 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORBIT - منصة المجتمع المستقبلية</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#0b0f19',
-                        sidebarBg: '#111827',
-                        cardBg: '#1f2937',
-                        hoverBg: '#374151',
-                        orbitBlue: '#3b82f6',
-                        orbitViolet: '#8b5cf6',
-                        discordChat: '#313338',
-                        discordSidebar: '#2b2d31',
-                        discordServer: '#1e1f22',
-                    }
-                }
-            }
-        }
-    </script>
+    <title>ORBIT — منصة التواصل والمجتمعات</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #111827; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
-        .modal-backdrop { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); }
-    </style>
-</head>
-<body class="bg-darkBg text-gray-100 font-sans h-screen flex overflow-hidden select-none">
-
-    <!-- 1. شريط السيرفرات الجانبي الأقصى -->
-    <aside class="w-20 bg-discordServer border-r border-gray-800 flex flex-col items-center py-4 space-y-3 z-30">
-        <!-- زر الرئيسية / الأصدقاء -->
-        <div onclick="switchView('home')" id="nav-home" class="w-12 h-12 bg-cardBg hover:bg-orbitBlue rounded-2xl flex items-center justify-center cursor-pointer transition-all group relative shadow-lg">
-            <i data-lucide="compass" class="w-6 h-6 text-orbitBlue group-hover:text-white"></i>
-            <div class="absolute right-full mr-3 px-2.5 py-1 bg-gray-900 text-xs rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl font-bold">الرئيسية والأصدقاء</div>
-        </div>
-
-        <div class="w-8 h-[2px] bg-gray-800 rounded-full"></div>
-
-        <!-- قائمة السيرفرات الديناميكية -->
-        <div id="servers-sidebar-list" class="flex-1 w-full flex flex-col items-center space-y-3 overflow-y-auto px-2">
-            <!-- تُعبأ تلقائياً عبر JavaScript -->
-        </div>
-
-        <!-- زر إضافة سيرفر جديد -->
-        <div onclick="openModal('createServerModal')" class="w-12 h-12 bg-cardBg hover:bg-green-600 rounded-2xl flex items-center justify-center cursor-pointer transition-all group relative shadow-md">
-            <i data-lucide="plus" class="w-6 h-6 text-green-400 group-hover:text-white"></i>
-            <div class="absolute right-full mr-3 px-2.5 py-1 bg-gray-900 text-xs rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl font-bold">إنشاء سيرفر جديد</div>
-        </div>
-
-        <!-- زر استكشاف المجتمعات -->
-        <div onclick="openModal('exploreModal')" class="w-12 h-12 bg-cardBg hover:bg-orbitViolet rounded-2xl flex items-center justify-center cursor-pointer transition-all group relative shadow-md">
-            <i data-lucide="globe" class="w-6 h-6 text-orbitViolet group-hover:text-white"></i>
-            <div class="absolute right-full mr-3 px-2.5 py-1 bg-gray-900 text-xs rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl font-bold">استكشاف المجتمعات</div>
-        </div>
-    </aside>
-
-    <!-- الهيكل الرئيسي للموقع (يتبدل حسب المنظر: سيرفر أو أصدقاء) -->
-    <div id="main-app-container" class="flex-1 flex overflow-hidden">
-        <!-- يتم ملؤه ديناميكياً -->
-    </div>
-
-    <!-- نافذة (Modal) الملف الشخصي -->
-    <div id="profileModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-sidebarBg border border-gray-700 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-150">
-            <div id="profileModalBanner" class="h-32 bg-gradient-to-r from-orbitBlue to-orbitViolet relative p-4 flex justify-end">
-                <button onclick="closeModal('profileModal')" class="text-white bg-black/40 hover:bg-black/60 p-1.5 rounded-full transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="px-6 pb-6 relative">
-                <div class="flex justify-between items-end -mt-12 mb-4">
-                    <div id="profileModalAvatar" class="w-24 h-24 rounded-2xl bg-cardBg border-4 border-sidebarBg flex items-center justify-center text-3xl font-bold shadow-xl">👑</div>
-                    <button onclick="openModal('settingsModal'); closeModal('profileModal');" class="bg-orbitBlue hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors">تعديل الملف الشخصي</button>
-                </div>
-                <h2 id="profileModalName" class="text-xl font-bold text-white">اسم المستخدم</h2>
-                <p id="profileModalHandle" class="text-sm text-gray-400">@username</p>
-                <div class="my-4 border-t border-gray-800 pt-4">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">النبذة التعريفية</h3>
-                    <p id="profileModalBio" class="text-sm text-gray-300">لا توجد نبذة تعريفية حالياً.</p>
-                </div>
-                <div class="border-t border-gray-800 pt-4">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">الشارات والإنجازات</h3>
-                    <div id="profileModalBadges" class="flex space-x-2 space-x-reverse">
-                        <span class="px-2.5 py-1 bg-orbitBlue/20 text-orbitBlue text-xs font-bold rounded-lg border border-orbitBlue/30">مؤسس ORBIT</span>
-                        <span class="px-2.5 py-1 bg-orbitViolet/20 text-orbitViolet text-xs font-bold rounded-lg border border-orbitViolet/30">مطور مميز</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة (Modal) إنشاء سيرفر -->
-    <div id="createServerModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-sidebarBg border border-gray-700 w-full max-w-md rounded-2xl p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-white">إنشاء سيرفر جديد</h2>
-                <button onclick="closeModal('createServerModal')" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <p class="text-sm text-gray-400 mb-6">السيرفر هو مكانك أنت وأصدقاؤك للتحدث واللعب معاً. أنشئ سيرفرك الخاص وابدأ البناء.</p>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-300 uppercase mb-2">اسم السيرفر</label>
-                    <input type="text" id="newServerNameInput" placeholder="سيرفر الأصدقاء الخرافي..." class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orbitBlue">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-300 uppercase mb-2">لون هداية السيرفر / الأيقونة</label>
-                    <select id="newServerColorInput" class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orbitBlue">
-                        <option value="from-blue-600 to-indigo-600">أزرق ملكي</option>
-                        <option value="from-purple-600 to-pink-600">بنفسجي ووردي</option>
-                        <option value="from-emerald-600 to-teal-600">زمردي وأخضر</option>
-                        <option value="from-amber-500 to-red-600">ذهبي وناري</option>
-                    </select>
-                </div>
-            </div>
-            <div class="mt-8 flex justify-end space-x-3 space-x-reverse">
-                <button onclick="closeModal('createServerModal')" class="px-4 py-2.5 text-sm font-bold text-gray-300 hover:bg-cardBg rounded-xl transition-colors">إلغاء</button>
-                <button onclick="createNewServer()" class="px-5 py-2.5 text-sm font-bold bg-orbitBlue hover:bg-blue-600 text-white rounded-xl transition-colors shadow-lg shadow-orbitBlue/30">إنشاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة (Modal) استكشاف المجتمعات -->
-    <div id="exploreModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-sidebarBg border border-gray-700 w-full max-w-2xl rounded-2xl p-6 shadow-2xl max-h-[80vh] flex flex-col">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h2 class="text-xl font-bold text-white">استكشاف المجتمعات الرائجة</h2>
-                    <p class="text-xs text-gray-400 mt-1">انضم إلى مجتمعات الألعاب والتطوير والمرح العامة في منصة ORBIT</p>
-                </div>
-                <button onclick="closeModal('exploreModal')" class="text-gray-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div id="exploreServersList" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                <!-- تُعبأ بالعامة -->
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة الإعدادات الشاملة المتكاملة -->
-    <div id="settingsModal" class="fixed inset-0 modal-backdrop hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-sidebarBg border border-gray-700 w-full max-w-4xl h-[85vh] rounded-2xl overflow-hidden shadow-2xl flex">
-            <!-- شريط تصنيفات الإعدادات -->
-            <div class="w-64 bg-discordServer border-r border-gray-800 p-6 flex flex-col space-y-1">
-                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-3">إعدادات المستخدم</div>
-                <button onclick="switchSettingsTab('account')" id="settings-tab-account" class="w-full text-right px-3 py-2.5 rounded-xl text-sm font-medium bg-orbitBlue text-white transition-colors flex items-center space-x-3 space-x-reverse"><i data-lucide="user" class="w-4 h-4 ml-2"></i> الحساب والملف</button>
-                <button onclick="switchSettingsTab('appearance')" id="settings-tab-appearance" class="w-full text-right px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-cardBg transition-colors flex items-center space-x-3 space-x-reverse"><i data-lucide="palette" class="w-4 h-4 ml-2"></i> المظهر والسمات</button>
-                <button onclick="switchSettingsTab('voice')" id="settings-tab-voice" class="w-full text-right px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-cardBg transition-colors flex items-center space-x-3 space-x-reverse"><i data-lucide="mic" class="w-4 h-4 ml-2"></i> الصوت والفيديو</button>
-                <button onclick="switchSettingsTab('notifications')" id="settings-tab-notifications" class="w-full text-right px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-cardBg transition-colors flex items-center space-x-3 space-x-reverse"><i data-lucide="bell" class="w-4 h-4 ml-2"></i> الإشعارات والأمان</button>
-                <div class="border-t border-gray-800 my-4"></div>
-                <button onclick="closeModal('settingsModal')" class="w-full text-right px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors flex items-center space-x-3 space-x-reverse"><i data-lucide="log-out" class="w-4 h-4 ml-2"></i> إغلاق الإعدادات</button>
-            </div>
-            <!-- محتوى الإعدادات -->
-            <div class="flex-1 p-8 overflow-y-auto" id="settingsContentArea">
-                <!-- محتوى تبويب الحساب افتراضياً -->
-            </div>
-        </div>
-    </div>
-
-    <!-- واجهة المكالمة الصوتية العائمة (عند الدخول لغرفة صوتية) -->
-    <div id="voiceOverlay" class="fixed bottom-4 left-4 bg-discordServer border border-gray-700 rounded-2xl p-4 shadow-2xl hidden z-40 w-80">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center space-x-2 space-x-reverse">
-                <i data-lucide="volume-2" class="w-5 h-5 text-green-400 animate-pulse"></i>
-                <div>
-                    <h4 class="text-sm font-bold text-white" id="activeVoiceChannelName">غرفة صوتية</h4>
-                    <p class="text-xs text-green-400">متصل الآن • صوت عالي الجودة</p>
-                </div>
-            </div>
-            <button onclick="leaveVoiceChannel()" class="text-red-400 hover:bg-red-500/20 p-2 rounded-xl transition-colors" title="قطع الاتصال"><i data-lucide="phone-off" class="w-4 h-4"></i></button>
-        </div>
-        <div id="voiceConnectedUsers" class="space-y-2 max-h-32 overflow-y-auto mb-3">
-            <!-- المتحدثون -->
-        </div>
-        <div class="flex items-center justify-center space-x-2 space-x-reverse border-t border-gray-800 pt-3">
-            <button onclick="toggleMute()" id="muteMicBtn" class="p-2.5 bg-cardBg hover:bg-hoverBg rounded-xl text-gray-200 transition-colors"><i data-lucide="mic" class="w-4 h-4"></i></button>
-            <button onclick="toggleScreenShare()" id="screenShareBtn" class="p-2.5 bg-cardBg hover:bg-hoverBg rounded-xl text-gray-200 transition-colors"><i data-lucide="monitor" class="w-4 h-4"></i></button>
-        </div>
-    </div>
-
-    <!-- JavaScript الأساسي ومنطق المنصة -->
-    <script>
-        // --- 1. هيكل البيانات الأساسي (State) واستمرارية localStorage ---
-        let appData = JSON.parse(localStorage.getItem('orbit_app_data_v2')) || {
-            currentUser: {
-                id: 'u_me',
-                name: 'زائر مميز',
-                handle: 'visitor_2026',
-                bio: 'مطور ومصمم محترف أعشق منصة ORBIT.',
-                avatar: '👑',
-                banner: 'from-blue-600 to-indigo-600',
-                status: 'online'
-            },
-            servers: [
-                {
-                    id: 'srv_1',
-                    name: 'ORBIT Official Hub',
-                    icon: 'O',
-                    color: 'from-blue-600 to-violet-600',
-                    isPublic: true,
-                    categories: [
-                        { id: 'cat_1', name: 'الترحيب والقواعد', channels: [ { id: 'ch_1', name: 'أعلانات-مهمة', type: 'text' }, { id: 'ch_2', name: 'عام', type: 'text' } ] },
-                        { id: 'cat_2', name: 'الغرف الصوتية', channels: [ { id: 'ch_3', name: '🔊 سواليف الشباب', type: 'voice' }, { id: 'ch_4', name: '🔊 بث الألعاب', type: 'voice' } ] }
-                    ]
-                },
-                {
-                    id: 'srv_2',
-                    name: 'ألعاب الأكشن والفضاء',
-                    icon: '🚀',
-                    color: 'from-purple-600 to-pink-600',
-                    isPublic: true,
-                    categories: [
-                        { id: 'cat_3', name: 'قنوات الدردشة', channels: [ { id: 'ch_5', name: 'النقاشات-العامة', type: 'text' }, { id: 'ch_6', name: 'مشاركات-التصميم', type: 'text' } ] },
-                        { id: 'cat_4', name: 'الصوتيات', channels: [ { id: 'ch_7', name: '🔊 غرفة السكواد', type: 'voice' } ] }
-                    ]
-                }
-            ],
-            messages: {
-                'ch_1': [ { id: 'm1', user: 'ORBIT System', avatar: '🤖', text: 'أهلاً بك في القناة الرسمية للإعلانات والتحديثات في منصة أوربيت! 🚀', time: '12:00 م' } ],
-                'ch_2': [ { id: 'm2', user: 'مطور النظام', avatar: '👑', text: 'يا هلا بالشباب، النظام يعمل بأعلى كفاءة وتصميم ديسكورد متكامل.', time: '12:05 م' } ]
-            },
-            friends: [
-                { id: 'f1', name: 'سلطان القحطاني', handle: 'sultan_99', avatar: '⚡', status: 'online', activity: 'يلعب Fortnite' },
-                { id: 'f2', name: 'فهد العتيبي', handle: 'fahad_x', avatar: '🔥', status: 'idle', activity: 'متصل' },
-                { id: 'f3', name: 'ناصر الشمري', handle: 'nasser_dev', avatar: '💻', status: 'offline', activity: 'آخر ظهور منذ ساعة' }
-            ],
-            dms: {
-                'f1': [ { id: 'dm1', sender: 'f1', text: 'هلا والله، خلصت تصميم الماب ولا بعد؟', time: 'أمس' }, { id: 'dm2', sender: 'u_me', text: 'خلصت 22 مرحلة ورفعته!', time: 'اليوم' } ]
-            }
-        };
-
-        function saveAppData() {
-            localStorage.setItem('orbit_app_data_v2', JSON.stringify(appData));
+        :root {
+            --bg-0: #040509;
+            --bg-1: #070913;
+            --bg-2: #0B0F1E;
+            --bg-3: #12182E;
+            --bg-4: #1A2342;
+            --accent: #3F7CFF;
+            --accent-hover: #2F6BED;
+            --text-main: #E8EBF7;
+            --text-muted: #8C95B5;
+            --border: #1B2444;
+            --green: #2FCB86;
+            --red: #F0566B;
+            --yellow: #F2B544;
+            --purple: #9D4EDD;
         }
 
-        let currentView = 'home'; // 'home' or server id
-        let activeChannelId = 'ch_2';
-        let activeDmUserId = null;
-        let homeSubTab = 'online'; // 'online', 'all', 'add'
-        let currentVoiceChannel = null;
-        let isMicMuted = false;
-        let isScreenSharing = false;
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'IBM Plex Sans Arabic', sans-serif; user-select: none; }
+        body { background: var(--bg-0); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; }
 
-        // --- 2. الإطلاق والتهيئة ---
-        window.addEventListener('DOMContentLoaded', () => {
-            renderServersSidebar();
-            switchView(currentView);
-            lucide.createIcons();
-        });
+        .app-shell { display: flex; width: 100vw; height: 100vh; position: relative; background: var(--bg-0); }
 
-        // --- 3. التنقل بين الواجهات الرئيسية (الرئيسية/الأصدقاء مقابل السيرفرات) ---
-        function switchView(viewId) {
-            currentView = viewId;
-            // تحديث الأزرار النشطة في شريط السيرفرات
-            document.querySelectorAll('#servers-sidebar-list > div').forEach(el => el.classList.remove('ring-4', 'ring-orbitBlue'));
-            document.getElementById('nav-home').classList.remove('ring-4', 'ring-orbitBlue');
-
-            if (viewId === 'home') {
-                document.getElementById('nav-home').classList.add('ring-4', 'ring-orbitBlue');
-                renderHomeView();
-            } else {
-                const srvDiv = document.getElementById(`srv-icon-${viewId}`);
-                if (srvDiv) srvDiv.classList.add('ring-4', 'ring-orbitBlue');
-                renderServerView(viewId);
-            }
-            lucide.createIcons();
+        /* 1. Server Rail (Far Right in RTL) */
+        .server-rail {
+            width: 72px;
+            background: var(--bg-0);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 0;
+            z-index: 20;
+            flex-shrink: 0;
         }
 
-        // --- 4. عرض شريط السيرفرات الجانبي ---
-        function renderServersSidebar() {
-            const list = document.getElementById('servers-sidebar-list');
-            list.innerHTML = '';
-            appData.servers.forEach(srv => {
-                const div = document.createElement('div');
-                div.id = `srv-icon-${srv.id}`;
-                div.className = `w-12 h-12 bg-gradient-to-tr ${srv.color} rounded-2xl flex items-center justify-center cursor-pointer transition-all group relative shadow-md`;
-                div.innerHTML = `
-                    <span class="text-white font-bold text-lg">${srv.icon}</span>
-                    <div class="absolute right-full mr-3 px-2.5 py-1 bg-gray-900 text-xs rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl font-bold">${srv.name}</div>
-                `;
-                div.onclick = () => switchView(srv.id);
-                list.appendChild(div);
-            });
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
-        // --- 5. عرض واجهة الرئيسية والأصدقاء (Discord Home View) ---
-        function renderHomeView() {
-            const container = document.getElementById('main-app-container');
-            container.innerHTML = `
-                <!-- القائمة الجانبية للأصدقاء -->
-                <div class="w-60 bg-discordSidebar border-r border-gray-800 flex flex-col">
-                    <div class="h-16 border-b border-gray-800/60 px-4 flex items-center shadow-sm">
-                        <button class="w-full bg-darkBg text-gray-400 px-3 py-1.5 rounded-lg text-xs flex items-center justify-between shadow-inner">
-                            <span>البحث عن محادثة أو صديق...</span>
-                            <i data-lucide="search" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
-                    <div class="flex-1 overflow-y-auto p-3 space-y-1">
-                        <button onclick="switchHomeTab('online')" class="w-full flex items-center px-3 py-2.5 rounded-xl text-sm font-medium ${homeSubTab==='online'?'bg-gray-700/50 text-white':'text-gray-400 hover:bg-cardBg hover:text-gray-200'} transition-colors">
-                            <i data-lucide="users" class="w-4 h-4 ml-3"></i> الأصدقاء
-                        </button>
-                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wider px-3 pt-4 pb-2">المحادثات الخاصة (DMs)</div>
-                        <div id="dmListSidebar" class="space-y-1"></div>
-                    </div>
-                    <!-- شريط المستخدم السفلي -->
-                    <div class="p-3 bg-black/30 border-t border-gray-800 flex items-center justify-between">
-                        <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="openProfileModal('${appData.currentUser.id}')">
-                            <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr ${appData.currentUser.banner} flex items-center justify-center font-bold text-white text-base shadow">${appData.currentUser.avatar}</div>
-                            <div>
-                                <div class="text-xs font-bold text-gray-200">${appData.currentUser.name}</div>
-                                <div class="text-[10px] text-green-400">متصل الآن</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-1 space-x-reverse">
-                            <button onclick="openModal('settingsModal')" class="p-1.5 hover:bg-cardBg rounded-lg text-gray-400 hover:text-white transition-colors" title="الإعدادات"><i data-lucide="settings" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-                </div>
+        .server-icon:hover { border-radius: 16px; background: var(--accent); transform: scale(1.05); }
+        .server-icon.active { border-radius: 16px; background: linear-gradient(135deg, #3F7CFF, #7C3AED); }
+        .server-icon.active::before {
+            content: '';
+            position: absolute;
+            right: -14px;
+            top: 12px;
+            width: 5px;
+            height: 24px;
+            background: var(--text-main);
+            border-radius: 0 4px 4px 0;
+        }
+        .server-icon.home-btn { background: #0F1634; border: 1px solid #26336B; }
+        .server-icon.add-btn { background: transparent; border: 2px dashed var(--border); color: var(--green); }
+        .server-icon.add-btn:hover { background: var(--green); color: #fff; border-style: solid; }
+        .rail-sep { width: 32px; height: 2px; background: var(--border); border-radius: 1px; margin: 4px 0; }
 
-                <!-- المنطقة الرئيسية للأصدقاء أو المحادثة الخاصة -->
-                <div class="flex-1 flex flex-col bg-discordChat">
-                    <div id="homeContentArea" class="flex-1 flex flex-col"></div>
-                </div>
-            `;
-            renderDmSidebarList();
-            renderHomeContent();
-            lucide.createIcons();
+        /* 2. Left Sidebar (Channels / Navigation) */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-1);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 10;
         }
 
-        function switchHomeTab(tab) {
-            homeSubTab = tab;
-            activeDmUserId = null;
-            renderHomeContent();
+        .sidebar-header {
+            height: 52px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .sidebar-header:hover { background: rgba(255,255,255,0.02); }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .sidebar-content::-webkit-scrollbar { width: 4px; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .channel-category {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 10px 8px 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        function renderDmSidebarList() {
-            const list = document.getElementById('dmListSidebar');
-            if (!list) return;
-            list.innerHTML = '';
-            appData.friends.forEach(f => {
-                const item = document.createElement('div');
-                item.className = `flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-colors ${activeDmUserId === f.id ? 'bg-cardBg text-white' : 'text-gray-400 hover:bg-cardBg/50 hover:text-gray-200'}`;
-                item.innerHTML = `
-                    <div class="flex items-center space-x-3 space-x-reverse">
-                        <div class="relative">
-                            <div class="w-8 h-8 rounded-xl bg-cardBg flex items-center justify-center text-sm font-bold">${f.avatar}</div>
-                            <span class="absolute bottom-0 left-0 w-2.5 h-2.5 rounded-full border-2 border-discordSidebar ${f.status==='online'?'bg-green-500':'bg-amber-500'}"></span>
-                        </div>
-                        <span class="text-sm font-medium">${f.name}</span>
-                    </div>
-                `;
-                item.onclick = () => { activeDmUserId = f.id; renderHomeContent(); };
-                list.appendChild(item);
-            });
-        }
-
-        function renderHomeContent() {
-            const area = document.getElementById('homeContentArea');
-            if (!area) return;
-
-            if (activeDmUserId) {
-                const friend = appData.friends.find(f => f.id === activeDmUserId);
-                const msgs = appData.dms[activeDmUserId] || [];
-                area.innerHTML = `
-                    <div class="h-16 border-b border-gray-800/60 px-6 flex items-center justify-between bg-discordChat shadow-sm">
-                        <div class="flex items-center space-x-3 space-x-reverse">
-                            <span class="text-xl font-bold text-gray-400">@</span>
-                            <span class="font-bold text-white text-base">${friend.name}</span>
-                        </div>
-                    </div>
-                    <div id="dmChatMessages" class="flex-1 overflow-y-auto p-6 space-y-4">
-                        <div class="flex items-start space-x-4 space-x-reverse mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-cardBg flex items-center justify-center text-2xl">${friend.avatar}</div>
-                            <div>
-                                <h3 class="text-lg font-bold text-white">${friend.name}</h3>
-                                <p class="text-sm text-gray-400">هذه هي بداية رسائلك الخاصة مع ${friend.name}. تواصلوا بكل أمان وسلاسة.</p>
-                            </div>
-                        </div>
-                        ${msgs.map(m => `
-                            <div class="flex items-start space-x-4 space-x-reverse">
-                                <div class="w-10 h-10 rounded-xl bg-cardBg flex items-center justify-center font-bold text-sm">${m.sender === 'u_me' ? appData.currentUser.avatar : friend.avatar}</div>
-                                <div>
-                                    <div class="flex items-center space-x-2 space-x-reverse">
-                                        <span class="font-bold text-gray-200 text-sm">${m.sender === 'u_me' ? appData.currentUser.name : friend.name}</span>
-                                        <span class="text-xs text-gray-500">${m.time}</span>
-                                    </div>
-                                    <p class="text-gray-300 mt-1 text-sm">${m.text}</p>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="p-4 bg-discordChat border-t border-gray-800/60">
-                        <form onsubmit="sendDmMessage(event, '${friend.id}')" class="flex items-center bg-[#383a40] rounded-xl px-4 py-2.5 border border-transparent focus-within:border-orbitBlue transition-colors">
-                            <input type="text" id="dmInput" placeholder="التحدث إلى ${friend.name}..." class="flex-1 bg-transparent border-none outline-none text-gray-100 text-sm placeholder-gray-500">
-                            <button type="submit" class="bg-orbitBlue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors">إرسال</button>
-                        </form>
-                    </div>
-                `;
-            } else {
-                // شاشة قائمة الأصدقاء العامة
-                area.innerHTML = `
-                    <div class="h-16 border-b border-gray-800/60 px-6 flex items-center justify-between bg-discordChat shadow-sm">
-                        <div class="flex items-center space-x-4 space-x-reverse">
-                            <div class="flex items-center space-x-2 space-x-reverse text-white font-bold"><i data-lucide="users" class="w-5 h-5 text-gray-400"></i><span>الأصدقاء</span></div>
-                            <div class="w-[1px] h-5 bg-gray-700"></div>
-                            <div class="flex space-x-2 space-x-reverse text-sm">
-                                <button onclick="setFriendTab('online')" class="px-3 py-1 rounded-lg ${homeSubTab==='online'?'bg-cardBg text-white font-bold':'text-gray-400 hover:bg-cardBg/50'} transition-colors">المتصلون</button>
-                                <button onclick="setFriendTab('all')" class="px-3 py-1 rounded-lg ${homeSubTab==='all'?'bg-cardBg text-white font-bold':'text-gray-400 hover:bg-cardBg/50'} transition-colors">الكل</button>
-                                <button onclick="setFriendTab('add')" class="px-3 py-1 rounded-lg bg-green-600 text-white font-bold transition-colors">إضافة صديق</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex-1 p-6 overflow-y-auto">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">قائمة الأصدقاء — ${appData.friends.length}</h3>
-                        <div class="space-y-2">
-                            ${appData.friends.map(f => `
-                                <div class="flex items-center justify-between p-3 bg-cardBg/40 hover:bg-cardBg rounded-xl border border-gray-800/60 transition-colors">
-                                    <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="openProfileModal('${f.id}')">
-                                        <div class="w-10 h-10 rounded-2xl bg-cardBg border border-gray-700 flex items-center justify-center text-lg">${f.avatar}</div>
-                                        <div>
-                                            <div class="font-bold text-white text-sm">${f.name}</div>
-                                            <div class="text-xs text-gray-400">${f.activity}</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-2 space-x-reverse">
-                                        <button onclick="activeDmUserId = '${f.id}'; renderHomeContent(); renderDmSidebarList();" class="p-2.5 bg-discordServer hover:bg-orbitBlue rounded-xl text-gray-200 transition-colors" title="إرسال رسالة"><i data-lucide="message-square" class="w-4 h-4"></i></button>
-                                        <button onclick="removeFriend('${f.id}')" class="p-2.5 bg-discordServer hover:bg-red-600 rounded-xl text-gray-200 transition-colors" title="إزالة من الأصدقاء"><i data-lucide="user-x" class="w-4 h-4"></i></button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            lucide.createIcons();
-        }
-
-        function setFriendTab(tab) {
-            if (tab === 'add') {
-                const name = prompt('أدخل اسم المستخدم أو المعرف للإضافة (مثال: sultan_99):');
-                if (name) {
-                    appData.friends.push({ id: 'f_' + Date.now(), name: name, handle: name, avatar: '👤', status: 'online', activity: 'صديق جديد' });
-                    saveAppData();
-                    renderHomeContent();
-                    renderDmSidebarList();
-                    alert('تم إرسال طلب الصداقة بنجاح!');
-                }
-            } else {
-                homeSubTab = tab;
-                renderHomeContent();
-            }
-        }
-
-        function sendDmMessage(e, friendId) {
-            e.preventDefault();
-            const input = document.getElementById('dmInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            if (!appData.dms[friendId]) appData.dms[friendId] = [];
-            appData.dms[friendId].push({ id: 'm_' + Date.now(), sender: 'u_me', text: text, time: 'الآن' });
-            saveAppData();
-            renderHomeContent();
-            input.value = '';
-        }
-
-        // --- 6. عرض واجهة السيرفرات وقنواتها ---
-        function renderServerView(srvId) {
-            const server = appData.servers.find(s => s.id === srvId);
-            if (!server) return;
-
-            const container = document.getElementById('main-app-container');
-            container.innerHTML = `
-                <!-- شريط القنوات الجانبي -->
-                <div class="w-60 bg-discordSidebar border-r border-gray-800 flex flex-col">
-                    <div class="h-16 border-b border-gray-800/60 px-4 flex items-center justify-between shadow-sm cursor-pointer hover:bg-cardBg/40 transition-colors">
-                        <h1 class="font-bold text-white text-base truncate">${server.name}</h1>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
-                    </div>
-
-                    <div class="flex-1 overflow-y-auto p-3 space-y-4">
-                        ${server.categories.map(cat => `
-                            <div>
-                                <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 px-2 flex items-center justify-between">
-                                    <span>${cat.name}</span>
-                                    <i data-lucide="plus" class="w-3.5 h-3.5 cursor-pointer hover:text-white" onclick="addNewChannelPrompt('${server.id}', '${cat.id}')"></i>
-                                </div>
-                                <div class="space-y-0.5">
-                                    ${cat.channels.map(ch => `
-                                        <div onclick="${ch.type === 'text' ? `selectChannel('${ch.id}')` : `joinVoiceChannel('${ch.name}')`}" 
-                                            class="flex items-center px-3 py-2 rounded-xl cursor-pointer transition-colors ${activeChannelId === ch.id && ch.type === 'text' ? 'bg-gray-700/60 text-white font-bold' : 'text-gray-400 hover:bg-cardBg hover:text-gray-200'} text-sm">
-                                            <span class="ml-2.5 text-gray-500">${ch.type === 'text' ? '#' : '🔊'}</span>
-                                            <span class="truncate">${ch.name}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-
-                    <!-- شريط المستخدم السفلي -->
-                    <div class="p-3 bg-black/30 border-t border-gray-800 flex items-center justify-between">
-                        <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="openProfileModal('${appData.currentUser.id}')">
-                            <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr ${appData.currentUser.banner} flex items-center justify-center font-bold text-white text-base shadow">${appData.currentUser.avatar}</div>
-                            <div>
-                                <div class="text-xs font-bold text-gray-200">${appData.currentUser.name}</div>
-                                <div class="text-[10px] text-green-400">متصل الآن</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-1 space-x-reverse">
-                            <button onclick="openModal('settingsModal')" class="p-1.5 hover:bg-cardBg rounded-lg text-gray-400 hover:text-white transition-colors" title="الإعدادات"><i data-lucide="settings" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- مساحة الدردشة والأعضاء -->
-                <div class="flex-1 flex bg-discordChat">
-                    <div class="flex-1 flex flex-col">
-                        <!-- الشريط العلوي للقناة -->
-                        <div class="h-16 border-b border-gray-800/60 px-6 flex items-center justify-between bg-discordChat shadow-sm">
-                            <div class="flex items-center space-x-2 space-x-reverse">
-                                <span class="text-xl font-bold text-gray-400">#</span>
-                                <span class="font-bold text-white text-base" id="activeChannelTitle">عام</span>
-                                <span class="text-gray-600 mx-2">|</span>
-                                <span class="text-xs text-gray-400">مرحباً بك في مجتمع ${server.name} المتميز!</span>
-                            </div>
-                            <div class="flex items-center space-x-3 space-x-reverse text-gray-300">
-                                <button onclick="alert('تم نسخ رابط الدعوة الخاص بالسيرفر بنجاح!')" class="p-2 hover:bg-cardBg rounded-xl transition-colors" title="نسخ رابط الدعوة"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
-                                <button onclick="openModal('exploreModal')" class="p-2 hover:bg-cardBg rounded-xl transition-colors" title="استكشاف"><i data-lucide="compass" class="w-4 h-4"></i></button>
-                            </div>
-                        </div>
-
-                        <!-- صندوق الرسائل -->
-                        <div id="chatMessagesContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
-                            <!-- تُعبأ بالرسائل -->
-                        </div>
-
-                        <!-- صندوق إرسال الرسائل -->
-                        <div class="p-4 bg-discordChat border-t border-gray-800/60">
-                            <form onsubmit="sendServerMessage(event)" class="flex items-center bg-[#383a40] rounded-xl px-4 py-3 border border-transparent focus-within:border-orbitBlue transition-colors">
-                                <input type="text" id="serverMessageInput" placeholder="إرسال رسالة إلى القناة..." class="flex-1 bg-transparent border-none outline-none text-gray-100 text-sm placeholder-gray-500">
-                                <button type="submit" class="bg-orbitBlue hover:bg-blue-600 text-white px-5 py-2 rounded-lg text-xs font-bold transition-colors shadow-md">إرسال</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- قائمة الأعضاء الجانبية -->
-                    <div class="w-60 bg-discordSidebar border-l border-gray-800 p-4 hidden lg:flex flex-col space-y-4">
-                        <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">الأعضاء المتصلون — 3</div>
-                        <div class="space-y-2">
-                            <div class="flex items-center space-x-3 space-x-reverse p-2 hover:bg-cardBg rounded-xl cursor-pointer transition-colors" onclick="openProfileModal('u_me')">
-                                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr ${appData.currentUser.banner} flex items-center justify-center font-bold text-white text-xs">${appData.currentUser.avatar}</div>
-                                <div><div class="text-xs font-bold text-white">${appData.currentUser.name}</div><div class="text-[10px] text-green-400">مؤسس السيرفر</div></div>
-                            </div>
-                            <div class="flex items-center space-x-3 space-x-reverse p-2 hover:bg-cardBg rounded-xl cursor-pointer transition-colors">
-                                <div class="w-8 h-8 rounded-xl bg-cardBg flex items-center justify-center font-bold text-xs">⚡</div>
-                                <div><div class="text-xs font-bold text-gray-300">سلطان القحطاني</div><div class="text-[10px] text-gray-500">مشرف النظام</div></div>
-                            </div>
-                            <div class="flex items-center space-x-3 space-x-reverse p-2 hover:bg-cardBg rounded-xl cursor-pointer transition-colors">
-                                <div class="w-8 h-8 rounded-xl bg-cardBg flex items-center justify-center font-bold text-xs">🔥</div>
-                                <div><div class="text-xs font-bold text-gray-300">فهد العتيبي</div><div class="text-[10px] text-gray-500">عضو مميز</div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            renderChatMessages();
-            lucide.createIcons();
-        }
-
-        function selectChannel(chId) {
-            activeChannelId = chId;
-            renderChatMessages();
-        }
-
-        function renderChatMessages() {
-            const container = document.getElementById('chatMessagesContainer');
-            if (!container) return;
-            const msgs = appData.messages[activeChannelId] || [
-                { id: 'm_def', user: 'ORBIT System', avatar: '🤖', text: 'أهلاً بك في هذه القناة الجديدة. ابدأ المحادثة الآن!', time: 'الآن' }
-            ];
-
-            container.innerHTML = msgs.map(m => `
-                <div class="flex items-start space-x-4 space-x-reverse group hover:bg-cardBg/20 p-2 rounded-xl transition-colors">
-                    <div class="w-10 h-10 rounded-2xl bg-cardBg border border-gray-700 flex items-center justify-center font-bold text-sm">${m.avatar}</div>
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-2 space-x-reverse">
-                            <span class="font-bold text-gray-200 text-sm">${m.user}</span>
-                            <span class="text-xs text-gray-500">${m.time}</span>
-                        </div>
-                        <p class="text-gray-300 mt-1 text-sm leading-relaxed">${m.text}</p>
-                    </div>
-                    <button onclick="deleteMessage('${activeChannelId}', '${m.id}')" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 p-1 transition-opacity" title="حذف الرسالة"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>
-            `).join('');
-            container.scrollTop = container.scrollHeight;
-            lucide.createIcons();
-        }
-
-        function sendServerMessage(e) {
-            e.preventDefault();
-            const input = document.getElementById('serverMessageInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            if (!appData.messages[activeChannelId]) appData.messages[activeChannelId] = [];
-            appData.messages[activeChannelId].push({
-                id: 'm_' + Date.now(),
-                user: appData.currentUser.name,
-                avatar: appData.currentUser.avatar,
-                text: text,
-                time: 'الآن'
-            });
-            saveAppData();
-            renderChatMessages();
-            input.value = '';
-        }
-
-        function deleteMessage(chId, msgId) {
-            if (confirm('هل أنت متأكد من حذف هذه الرسالة؟')) {
-                appData.messages[chId] = appData.messages[chId].filter(m => m.id !== msgId);
-                saveAppData();
-                renderChatMessages();
-            }
-        }
-
-        function addNewChannelPrompt(srvId, catId) {
-            const name = prompt('أدخل اسم القناة الجديدة (مثال: سواليف-العامة):');
-            if (!name) return;
-            const srv = appData.servers.find(s => s.id === srvId);
-            const cat = srv.categories.find(c => c.id === catId);
-            cat.channels.push({ id: 'ch_' + Date.now(), name: name, type: 'text' });
-            saveAppData();
-            renderServerView(srvId);
-        }
-
-        function createNewServer() {
-            const nameInput = document.getElementById('newServerNameInput');
-            const colorInput = document.getElementById('newServerColorInput');
-            const name = nameInput.value.trim();
-            if (!name) return alert('يرجى إدخال اسم السيرفر.');
-
-            const newId = 'srv_' + Date.now();
-            appData.servers.push({
-                id: newId,
-                name: name,
-                icon: name.charAt(0).toUpperCase(),
-                color: colorInput.value,
-                isPublic: true,
-                categories: [
-                    { id: 'cat_def', name: 'قنوات عامة', channels: [ { id: 'ch_def_' + Date.now(), name: 'عام', type: 'text' } ] }
-                ]
-            });
-            saveAppData();
-            renderServersSidebar();
-            closeModal('createServerModal');
-            switchView(newId);
-        }
-
-        // --- 7. الصوت والفيديو (Voice Rooms) ---
-        function joinVoiceChannel(channelName) {
-            currentVoiceChannel = channelName;
-            document.getElementById('activeVoiceChannelName').innerText = channelName;
-            document.getElementById('voiceOverlay').classList.remove('hidden');
-            renderVoiceUsers();
-        }
-
-        function leaveVoiceChannel() {
-            currentVoiceChannel = null;
-            document.getElementById('voiceOverlay').classList.add('hidden');
-        }
-
-        function renderVoiceUsers() {
-            const container = document.getElementById('voiceConnectedUsers');
-            container.innerHTML = `
-                <div class="flex items-center justify-between p-2 bg-cardBg rounded-xl">
-                    <div class="flex items-center space-x-2 space-x-reverse">
-                        <div class="w-7 h-7 rounded-lg bg-orbitBlue flex items-center justify-center text-xs font-bold text-white">${appData.currentUser.avatar}</div>
-                        <span class="text-xs font-bold text-white">${appData.currentUser.name} (أنت)</span>
-                    </div>
-                    <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-ping"></span>
-                </div>
-            `;
-        }
-
-        function toggleMute() {
-            isMicMuted = !isMicMuted;
-            const btn = document.getElementById('muteMicBtn');
-            btn.className = `p-2.5 rounded-xl transition-colors ${isMicMuted ? 'bg-red-600 text-white' : 'bg-cardBg hover:bg-hoverBg text-gray-200'}`;
-            btn.innerHTML = `<i data-lucide="${isMicMuted ? 'mic-off' : 'mic'}" class="w-4 h-4"></i>`;
-            lucide.createIcons();
-        }
-
-        function toggleScreenShare() {
-            isScreenSharing = !isScreenSharing;
-            const btn = document.getElementById('screenShareBtn');
-            btn.className = `p-2.5 rounded-xl transition-colors ${isScreenSharing ? 'bg-orbitBlue text-white' : 'bg-cardBg hover:bg-hoverBg text-gray-200'}`;
-            alert(isScreenSharing ? 'تم بدء مشاركة الشاشة بنجاح!' : 'تم إيقاف مشاركة الشاشة.');
-        }
-
-        // --- 8. الإدارة والنوافذ المنبثقة (Modals & Profile) ---
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            if (id === 'exploreModal') renderExploreServers();
-            if (id === 'settingsModal') switchSettingsTab('account');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function openProfileModal(userId) {
-            const user = userId === 'u_me' ? appData.currentUser : appData.friends.find(f => f.id === userId);
-            if (!user) return;
-
-            document.getElementById('profileModalBanner').className = `h-32 bg-gradient-to-r ${user.banner || 'from-orbitBlue to-orbitViolet'} relative p-4 flex justify-end`;
-            document.getElementById('profileModalAvatar').innerText = user.avatar;
-            document.getElementById('profileModalName').innerText = user.name;
-            document.getElementById('profileModalHandle').innerText = '@' + (user.handle || 'user');
-            document.getElementById('profileModalBio').innerText = user.bio || 'لا توجد نبذة تعريفية.';
-            document.getElementById('profileModal').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        function renderExploreServers() {
-            const list = document.getElementById('exploreServersList');
-            list.innerHTML = appData.servers.map(s => `
-                <div class="flex items-center justify-between p-4 bg-cardBg/60 hover:bg-cardBg rounded-2xl border border-gray-800 transition-colors">
-                    <div class="flex items-center space-x-4 space-x-reverse">
-                        <div class="w-12 h-12 bg-gradient-to-tr ${s.color} rounded-2xl flex items-center justify-center font-bold text-white text-lg">${s.icon}</div>
-                        <div>
-                            <h4 class="font-bold text-white text-base">${s.name}</h4>
-                            <p class="text-xs text-gray-400 mt-0.5">سيرفر مجتمعي معتمد في منصة ORBIT</p>
-                        </div>
-                    </div>
-                    <button onclick="switchView('${s.id}'); closeModal('exploreModal');" class="px-4 py-2 bg-orbitBlue hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-colors">انضمام</button>
-                </div>
-            `).join('');
-        }
-
-        // --- 9. الإعدادات الشاملة (Settings Tabs) ---
-        function switchSettingsTab(tab) {
-            ['account', 'appearance', 'voice', 'notifications'].forEach(t => {
-                const btn = document.getElementById(`settings-tab-${t}`);
-                if (btn) btn.className = `w-full text-right px-3 py-2.5 rounded-xl text-sm font-medium ${t === tab ? 'bg-orbitBlue text-white' : 'text-gray-300 hover:bg-cardBg'} transition-colors flex items-center space-x-3 space-x-reverse`;
-            });
-
-            const content = document.getElementById('settingsContentArea');
-            if (tab === 'account') {
-                content.innerHTML = `
-                    <h2 class="text-xl font-bold text-white mb-6">إعدادات الحساب والملف الشخصي</h2>
-                    <div class="space-y-6 max-w-lg">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">اسم المستخدم المعروض</label>
-                            <input type="text" id="settingsNameInput" value="${appData.currentUser.name}" class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orbitBlue">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-2">النبذة التعريفية (Bio)</label>
-                            <textarea id="settingsBioInput" class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orbitBlue h-24">${appData.currentUser.bio}</textarea>
-                        </div>
-                        <button onclick="saveUserSettings()" class="px-6 py-3 bg-orbitBlue hover:bg-blue-600 text-white font-bold text-sm rounded-xl transition-colors shadow-lg shadow-orbitBlue/30">حفظ التغييرات</button>
-                    </div>
-                `;
-            } else if (tab === 'appearance') {
-                content.innerHTML = `
-                    <h2 class="text-xl font-bold text-white mb-6">المظهر والسمات البصرية</h2>
-                    <p class="text-sm text-gray-300 mb-4">منصة ORBIT تستخدم الثيم الداكن المستقبلي (Deep Dark & Neon) لضمان تجربة مريحة للعين.</p>
-                    <div class="grid grid-cols-2 gap-4 max-w-lg">
-                        <div class="p-4 bg-darkBg border-2 border-orbitBlue rounded-2xl text-center font-bold text-white cursor-pointer">الثيم الداكن الفاخر (افتراضي)</div>
-                        <div class="p-4 bg-gray-200 text-gray-800 rounded-2xl text-center font-bold opacity-50 cursor-not-allowed">الثيم الفاتح (قريباً)</div>
-                    </div>
-                `;
-            } else if (tab === 'voice') {
-                content.innerHTML = `
-                    <h2 class="text-xl font-bold text-white mb-6">إعدادات الصوت والفيديو</h2>
-                    <div class="space-y-4 max-w-lg text-sm text-gray-300">
-                        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-2">جهاز الإدخال (الميكروفون)</label><select class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-white"><option>الميكروفون الافتراضي للنظام</option></select></div>
-                        <div><label class="block text-xs font-bold text-gray-400 uppercase mb-2">جهاز الإخراج (السماعات)</label><select class="w-full bg-cardBg border border-gray-700 rounded-xl px-4 py-3 text-white"><option>السماعات الافتراضية للنظام</option></select></div>
-                    </div>
-                `;
-            } else if (tab === 'notifications') {
-                content.innerHTML = `
-                    <h2 class="text-xl font-bold text-white mb-6">الإشعارات والأمان</h2>
-                    <p class="text-sm text-gray-300">جميع الإشعارات مفعلة تلقائياً لضمان عدم تفويت أي رسالة مهمة.</p>
-                `;
-            }
-            lucide.createIcons();
-        }
-
-        function saveUserSettings() {
-            const name = document.getElementById('settingsNameInput').value.trim();
-            const bio = document.getElementById('settingsBioInput').value.trim();
-            if (name) appData.currentUser.name = name;
-            appData.currentUser.bio = bio;
-            saveAppData();
-            alert('تم حفظ تعديلات الملف الشخصي بنجاح!');
-            closeModal('settingsModal');
-            switchView(currentView);
-        }
-
-        function removeFriend(id) {
-            appData.friends = appData.friends.filter(f => f.id !== id);
-            saveAppData();
-            renderHomeContent();
-            renderDmSidebarList();
-        }
-    </script>
-</body>
-</html>
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            color: var(--text
